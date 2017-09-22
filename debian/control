@@ -1,0 +1,14 @@
+Source: vx-dga-l-scratch-2-offline
+Section: utils
+Priority: extra
+Maintainer: Ignacio Sancho <sannacho@gmail.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: http://migasfree.educa.aragon.es/repo/Lubuntu-14.04/STORES/base/
+
+Package: vx-dga-l-scratch-2-offline
+Architecture: all
+Pre-Depends: 
+Depends: ${misc:Depends}
+Description: Despliega Script para instalacion de Scratch 2.0 Offline
+ Despliega Script para instalacion de Scratch 2.0 Offline

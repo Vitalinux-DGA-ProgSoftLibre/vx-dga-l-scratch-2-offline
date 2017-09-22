@@ -1,0 +1,2 @@
+#!/bin/bash
+pkexec --user root /usr/bin/vx-inst-scratch-2-offline

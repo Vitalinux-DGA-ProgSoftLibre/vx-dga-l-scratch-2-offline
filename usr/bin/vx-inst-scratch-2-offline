@@ -1,0 +1,119 @@
+#!/bin/bash
+USER=$(whoami)
+function descargar-archivos {
+
+YADBARS=""
+CONTADOR=1
+for ruta in $@ ; do
+	# Obtenemos el nombre del archivo a descargar de la URL proporcionada
+  NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
+  YADBARS="$YADBARS --bar=Descargando->$NOMBREARCHIVO:NORM"
+done
+
+(
+CONTADOR=1
+for ruta in $@ ; do
+	NOMBREARCHIVO=$(echo "$ruta" | awk -F "/" {'print $NF'})
+	# Para cada barra de progreso: El primer parametro es la barra de progreso afectada y el segundo el texto que mostrará
+	wget "$ruta" 2>&1 | sed -u \
+	"s/.* \([0-9]\+%\)\ \+\([0-9,.]\+.\) \(.*\)/$CONTADOR:\1\n$CONTADOR:# Descargando a \2\/s, T. Restante: \3/"
+	# Obtenemos el resultado de la descarga proporcionado por wget
+	RET_WGET="${PIPESTATUS[0]}"
+	if [[ "$RET_WGET" = 0 ]] ; then
+		echo "$CONTADOR:100%"
+		echo "$CONTADOR:#Descarga de $NOMBREARCHIVO Completada ..."
+	else
+		echo "$CONTADOR:#Error en la Descarga de $NOMBREARCHIVO ..."
+	fi
+	CONTADOR=$(expr $CONTADOR + 1)
+done
+) | yad --center --width 700 \
+	--title "Descarga de Software" \
+	--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+	--justify="center" --text-align="center" \
+	--text "  Descargando el Software necesario ... <b>¡¡paciencia!!</b> ... \n  \n   URL: <b>$ruta</b> \n  " \
+	--multi-progress \
+	$YADBARS \
+	--auto-close --button="Abortar":1
+}
+
+
+yad --title "Asistente para instalar Scratch 2" --info \
+		--text "Se va a proceder a la instalación de Scratch 2 offline. Siga las instrucciones y espere a que se indique su finalizacion" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center"
+if [ $? = 0 ] && [ $USER = "root" ] ; then
+	##**Comprobar si ya está instalado**
+	if [ -f '/opt'/'Scratch 2'/bin/'Scratch 2' ] ; then
+		yad --title "Asistente para instalar Scratch 2" --info --text "Parece que Scratch 2 Offline ya está Instalado en éste equipo" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Entendido:0
+		exit 0
+	fi
+	cd /tmp/
+	descargar-archivos "http://airdownload.adobe.com/air/lin/download/2.6/AdobeAIRInstaller.bin" "https://scratch.mit.edu/scratchr2/static/sa/Scratch-454.air"
+	if [ $? = 1 ] ; then
+		yad --title "Asistente para instalar Scratch 2" --info --text "Hubo un error en la descarga de archivos...no se puede continuar con la instalación" \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Entendido:0
+		exit 1
+	fi
+	ARCH=$(uname -m)
+	(
+	#####
+	# Saltando la congelacion, ya que libnss3 requiere de la última versión disponible...
+	# Eliminar al actualizar el mirror
+	sed -i '/ubuntu/s/mirror.vitalinux.educa.aragon.es/es.archive.ubuntu.com/' /etc/apt/sources.list
+	apt-get update
+	#####
+	if [ $ARCH = "x86_64" ] ; then
+		# Instalar lib necesarias
+		apt-get --assume-yes --force-yes install libxt6:i386 libnspr4-0d:i386 libgtk2.0-0:i386 libstdc++6:i386 \
+		 libnss3-1d:i386 libnss-mdns:i386 libxml2:i386 libxslt1.1:i386 libcanberra-gtk-module:i386 \
+		 gtk2-engines-murrine:i386 libgnome-keyring0:i386
+		# Crear enlaces simbólicos
+		ln -s /usr/lib/x86_64-linux-gnu/libgnome-keyring.so.0 /usr/lib/libgnome-keyring.so.0
+		ln -s /usr/lib/x86_64-linux-gnu/libgnome-keyring.so.0.2.0 /usr/lib/libgnome-keyring.so.0.2.0
+	else
+		#Sistema de 32 bits. 
+		#Instalar librerias necesarias
+		apt-get --assume-yes --force-yes install libxt6 libnspr4-0d libgtk2.0-0 libstdc++6 libnss3-1d libnss-mdns \
+		 libxml2 libxslt1.1 libcanberra-gtk-module gtk2-engines-murrine 
+		# Crear enlaces simbólicos
+		ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0.2.0 /usr/lib/libgnome-keyring.so.0.2.0
+		ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0 /usr/lib/libgnome-keyring.so.0
+	fi
+	#####
+        # Saltando la congelacion, ya que libnss3 requiere de la última versión disponible...
+        # Eliminar al actualizar el mirror
+	sed -i '/ubuntu/s/es.archive.ubuntu.com/mirror.vitalinux.educa.aragon.es/' /etc/apt/sources.list
+	apt-get update
+	#####
+	YAD_P=`ps | awk ' $4 == "yad" {print $1}'`
+	kill -SIGUSR1 $YAD_P
+	) | yad --title "Descargando softw..." --text-info --tail --auto-close --width="600" --height="500" --center --no-buttons
+	chmod +x /tmp/AdobeAIRInstaller.bin /tmp/Scratch-443.air
+	/tmp/AdobeAIRInstaller.bin
+	if [ $? = 0 ] ; then
+		'Adobe AIR Application Installer' /tmp/Scratch-454.air
+	fi
+	if [ -f /usr/share/applications/edu.media.mit.scratch2editor.desktop ]; then
+		sed --follow-symlinks -i '/Categories=/ cCategories=Education;' /usr/share/applications/edu.media.mit.scratch2editor.desktop
+		sed --follow-symlinks -i '/Comment=/ cComment=Scratch2' /usr/share/applications/edu.media.mit.scratch2editor.desktop
+		yad --title "Asistente para instalar Scratch 2" --info --text "Scratch 2 Offline instalado..." \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Entendido:0
+		#Si todo ha ido ok, borramos el .desktop de instalacion para que no haya confusion
+		rm /usr/share/applications/inst-scratch-2-offline.desktop
+	else
+		yad --title "Asistente para instalar Scratch 2" --info --text "Algo fue mal en la instalacion..." \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Entendido:0
+	fi
+	rm -f /tmp/AdobeAIRInstaller.bin /tmp/Scratch-454.air
+elif [ $USER != "root" ]; then
+		yad --title "Asistente para instalar Scratch 2" --info --text "No tiene permiso para la instalacion..." \
+		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
+		--width="400" --height="100" --center --justify="center" --text-align="center" --button=Entendido:0
+fi
+
