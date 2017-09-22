@@ -2,7 +2,8 @@
 Encoding=UTF-8
 Name=Install Scratch 2 Offline
 Name[es]=Instala Scratch 2 Offline
-Name[es_ES]=inst-scratch-2-offline
+Name[en]=Install Scratch 2 Offline
+Name[es_ES]=Instala-scratch-2-offline
 Comment=Instala Scratch 2 Offline en el equipo
 Icon=/usr/share/pixmaps/menu-vitalinux/scratch.png
 Exec=/usr/bin/vx-pk-inst-scratch-2-offline

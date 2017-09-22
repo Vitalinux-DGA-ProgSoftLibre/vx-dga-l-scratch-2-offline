@@ -51,7 +51,7 @@ if [ $? = 0 ] && [ $USER = "root" ] ; then
 		exit 0
 	fi
 	cd /tmp/
-	descargar-archivos "http://airdownload.adobe.com/air/lin/download/2.6/AdobeAIRInstaller.bin" "https://scratch.mit.edu/scratchr2/static/sa/Scratch-454.air"
+	descargar-archivos "http://airdownload.adobe.com/air/lin/download/2.6/AdobeAIRInstaller.bin" "https://scratch.mit.edu/scratchr2/static/sa/Scratch-456.0.4.air"
 	if [ $? = 1 ] ; then
 		yad --title "Asistente para instalar Scratch 2" --info --text "Hubo un error en la descarga de archivos...no se puede continuar con la instalación" \
 		--window-icon=/usr/share/lxpanel/images/vitalinux.svg \
@@ -60,12 +60,6 @@ if [ $? = 0 ] && [ $USER = "root" ] ; then
 	fi
 	ARCH=$(uname -m)
 	(
-	#####
-	# Saltando la congelacion, ya que libnss3 requiere de la última versión disponible...
-	# Eliminar al actualizar el mirror
-	sed -i '/ubuntu/s/mirror.vitalinux.educa.aragon.es/es.archive.ubuntu.com/' /etc/apt/sources.list
-	apt-get update
-	#####
 	if [ $ARCH = "x86_64" ] ; then
 		# Instalar lib necesarias
 		apt-get --assume-yes --force-yes install libxt6:i386 libnspr4-0d:i386 libgtk2.0-0:i386 libstdc++6:i386 \
@@ -83,19 +77,13 @@ if [ $? = 0 ] && [ $USER = "root" ] ; then
 		ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0.2.0 /usr/lib/libgnome-keyring.so.0.2.0
 		ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0 /usr/lib/libgnome-keyring.so.0
 	fi
-	#####
-        # Saltando la congelacion, ya que libnss3 requiere de la última versión disponible...
-        # Eliminar al actualizar el mirror
-	sed -i '/ubuntu/s/es.archive.ubuntu.com/mirror.vitalinux.educa.aragon.es/' /etc/apt/sources.list
-	apt-get update
-	#####
 	YAD_P=`ps | awk ' $4 == "yad" {print $1}'`
 	kill -SIGUSR1 $YAD_P
-	) | yad --title "Descargando softw..." --text-info --tail --auto-close --width="600" --height="500" --center --no-buttons
-	chmod +x /tmp/AdobeAIRInstaller.bin /tmp/Scratch-443.air
+	) | yad --title "Descargando softw adicional necesario..." --text-info --tail --auto-close --width="600" --height="500" --center --no-buttons
+	chmod +x /tmp/AdobeAIRInstaller.bin /tmp/Scratch-456.0.4.air
 	/tmp/AdobeAIRInstaller.bin
 	if [ $? = 0 ] ; then
-		'Adobe AIR Application Installer' /tmp/Scratch-454.air
+		'Adobe AIR Application Installer' /tmp/Scratch-456.0.4.air
 	fi
 	if [ -f /usr/share/applications/edu.media.mit.scratch2editor.desktop ]; then
 		sed --follow-symlinks -i '/Categories=/ cCategories=Education;' /usr/share/applications/edu.media.mit.scratch2editor.desktop

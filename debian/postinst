@@ -16,10 +16,30 @@ set -e
 #          <conflicting-package> <version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
+is_fresh_install()
+{
+        if [ -z "$2" ] ; then
+                return 0
+        fi
+        return 1
+}
 
 
 case "$1" in
     configure)
+    if ! is_fresh_install $@ ; then
+        # Si no es la primera instalación puede ser que el usuario ya tenga el scratch instalado.
+        # Si lo tiene, se debería actualizar el mismo en el caso de estar instalado. Comprobar antes si hay entorno gráfico
+        # No es necesario instalar toda la historieta de AdobeInstaler
+        USUARIO="$(vx-usuario-grafico)"
+        if [ "" != "$USUARIO" ] && [ -d '/opt'/'Scratch 2'/ ]; then
+        	cd /tmp
+        	wget -c "https://scratch.mit.edu/scratchr2/static/sa/Scratch-456.0.4.air"
+        	'Adobe AIR Application Installer' /tmp/Scratch-456.0.4.air
+        fi
+
+    fi
+
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
