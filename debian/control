@@ -7,8 +7,11 @@ Standards-Version: 3.9.3
 Homepage: http://migasfree.educa.aragon.es/repo/Lubuntu-14.04/STORES/base/
 
 Package: vx-dga-l-scratch-2-offline
-Architecture: all
+Architecture: any
+Multi-Arch: same
 Pre-Depends: 
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, libgtk2.0-0 [i386], libstdc++6 [i386], libxml2 [i386], libxslt1.1 [i386], libcanberra-gtk-module [i386], gtk2-engines-murrine [i386], libqt4-qt3support [i386], libgnome-keyring0 [i386], libnss-mdns [i386], libnss3 [i386], libgtk2.0-0:i386 [amd64], libstdc++6:i386 [amd64], libxml2:i386 [amd64], libxslt1.1:i386 [amd64], libcanberra-gtk-module:i386 [amd64], gtk2-engines-murrine:i386 [amd64], libqt4-qt3support:i386 [amd64], libgnome-keyring0:i386 [amd64], libnss-mdns:i386 [amd64], libnss3:i386 [amd64]
+Conflicts: edu.media.mit.scratch2editor
+Replaces: edu.media.mit.scratch2editor
 Description: Despliega Script para instalacion de Scratch 2.0 Offline
  Despliega Script para instalacion de Scratch 2.0 Offline

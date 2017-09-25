@@ -27,18 +27,33 @@ is_fresh_install()
 
 case "$1" in
     configure)
-    if ! is_fresh_install $@ ; then
-        # Si no es la primera instalación puede ser que el usuario ya tenga el scratch instalado.
-        # Si lo tiene, se debería actualizar el mismo en el caso de estar instalado. Comprobar antes si hay entorno gráfico
-        # No es necesario instalar toda la historieta de AdobeInstaler
-        USUARIO="$(vx-usuario-grafico)"
-        if [ "" != "$USUARIO" ] && [ -d '/opt'/'Scratch 2'/ ]; then
-        	cd /tmp
-        	wget -c "https://scratch.mit.edu/scratchr2/static/sa/Scratch-456.0.4.air"
-        	'Adobe AIR Application Installer' /tmp/Scratch-456.0.4.air
-        fi
-
+    #if is_fresh_install $@ ; then
+    # Si no es la primera instalación puede ser que el usuario ya tenga el scratch instalado.
+    # Si lo tiene, se debería actualizar el mismo en el caso de estar instalado. Comprobar antes si hay entorno gráfico
+    # No es necesario instalar toda la historieta de AdobeInstaler
+    ARCH=$(uname -m)
+    if [ $ARCH = "x86_64" ] ; then
+        # Crear enlaces simbólicos necesarios para hacer visible el anillo de claves a Adobe Air
+        [ ! -f /usr/lib/libgnome-keyring.so.0 ] && ln -s /usr/lib/x86_64-linux-gnu/libgnome-keyring.so.0 /usr/lib/libgnome-keyring.so.0
+        [ ! -f /usr/lib/libgnome-keyring.so.0.2.0 ] && ln -s /usr/lib/x86_64-linux-gnu/libgnome-keyring.so.0.2.0 /usr/lib/libgnome-keyring.so.0.2.0
+    else
+        [ ! -f /usr/lib/libgnome-keyring.so.0.2.0 ] && ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0.2.0 /usr/lib/libgnome-keyring.so.0.2.0
+        [ ! -f /usr/lib/libgnome-keyring.so.0 ] && ln -s /usr/lib/i386-linux-gnu/libgnome-keyring.so.0 /usr/lib/libgnome-keyring.so.0
     fi
+    SOURCEDIR="/usr/share/vitalinux/scratch2"
+    ADOBEAIR="${SOURCEDIR}/AdobeAIRSDK.tbz2"
+    [ ! -d /opt/adobe-air-sdk ] && mkdir /opt/adobe-air-sdk
+    [ -f $ADOBEAIR ] && tar jxf $ADOBEAIR -C /opt/adobe-air-sdk
+    ADOBEAIRSDK="${SOURCEDIR}/adobe-air.tar.gz"
+    [ -f $ADOBEAIRSDK ] && tar xvf $ADOBEAIRSDK -C /opt/adobe-air-sdk
+    [ -f "/opt/adobe-air-sdk/adobe-air/adobe-air" ] && chmod +x /opt/adobe-air-sdk/adobe-air/adobe-air
+
+    [ ! -d /opt/adobe-air-sdk/scratch ] && mkdir /opt/adobe-air-sdk/scratch
+    SCRATCH="${SOURCEDIR}/Scratch-456.0.4.air"
+    [ -f $SCRATCH ] && mv $SCRATCH /opt/adobe-air-sdk/scratch
+
+
+    #fi
 
     ;;
 

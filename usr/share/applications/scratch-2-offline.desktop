@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Scratch 2 Offline
+Name[es]=Scratch 2 Offline
+Name[en]=Scratch 2 Offline
+Comment=Scratch 2 Offline
+Icon=/usr/share/pixmaps/menu-vitalinux/scratch.png
+Exec=/opt/adobe-air-sdk/adobe-air/adobe-air /opt/adobe-air-sdk/scratch/Scratch-456.0.4.air
+Terminal=false
+Type=Application
+Categories=Education
+MimeType=application/x-scratch-project
